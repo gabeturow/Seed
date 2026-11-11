@@ -1,0 +1,106 @@
+# The Seed source list. One source per line. Lines starting with # are ignored.
+# You can also add and edit sources inside the website (Admin > Sources).
+American College of Lifestyle Medicine
+American Heart Association
+Anthesis
+ATNI (Access to Nutrition Initiative)
+B Lab (GreenSHOUTING Guide)
+Bain & Company
+Balanced
+Balanced Protein Consortium
+BCG (Boston Consulting Group)
+Behavior Global
+Better Food Foundation
+BSR (Business for Social Responsibility)
+Ceres
+Climate Power
+Compassion in World Farming
+Creatives for Climate
+Culinary Institute of America
+Datassential
+Deloitte
+Eat Well Global
+Edelman
+Environmental Defense Fund
+Environmental Polling Consortium
+Farm Forward
+Fenton
+Food DisInfo Lab
+Food Insight Group
+Food + Planet
+Food System Innovations
+Food Systems Foresight
+Foodminds
+Fortnight Collective
+Friends of the Earth
+Futerra
+GAIN (Global Alliance for Improved Nutrition)
+Global Impact Collective
+GMMB
+Good Food Institute
+Good Food Purchasing Program
+Greener by Default
+Greenworks
+Hartman Group
+Hubbub
+Humane World for Animals
+James Beard Foundation
+Ketchum
+KitchenTown
+KK&P (Karen Karp & Partners)
+KPMG
+Littlefoot Ventures
+Luminas
+Mattson
+McKinsey & Company
+Menus of Change University Research Collaborative
+Mercy For Animals
+Natural Resources Defense Council
+New Roots Institute
+NielsenIQ
+NNOCCI
+Nutrition Business Advisors
+Ogilvy
+One Kitchen (Wholesome Wave)
+People for Better Food
+Plant Futures
+Pollock Communications
+Porter Novelli
+ProVeg
+Raising Nutrition
+Rare
+Real Food Challenge
+ReFED
+Rising Tide
+Rouxbe
+Smoketown
+Spitfire Strategies
+Sustainable America
+Sustainable Restaurant Association
+The Culinary Edge
+The Food Group
+Topos Partners
+UPGRADE Dining (Food 4 Thought Innovations)
+UpRoot
+Weber Shandwick
+Workforce Nutrition Association (GAIN)
+World Resources Institute
+World Wildlife Fund
+WRAP Americas
+YouGov
+# Sources that appear in the starter articles
+Appetite (Elsevier)
+Food and Agriculture Organization of the United Nations (FAO)
+Knorr
+Nature
+The Lancet
+United Nations Environment Programme (UNEP)
+World Business Council for Sustainable Development (WBCSD)
+# Sources that appear in the shared Drive folder
+Berkeley Food Institute (University of California, Berkeley)
+BITE: Building Impact Through Eaters
+Ecological Economics (Elsevier)
+Food for Climate League
+JAMA Internal Medicine
+Nature Climate Change
+Psychological Science
