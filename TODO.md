@@ -25,7 +25,7 @@
 - [ ] Confirm the years and author names flagged "Please confirm" in admin notes, such as Turnwald, Boles, and Crum 2017 and Camilleri et al. 2019.
 
 ## To build next
-- [ ] **Put it online.** Right now The Seed runs only on this computer, so partners can't reach it yet. Next step: host it (for example, on Vercel) with the same Supabase keys.
+- [ ] **Put it online on Vercel** (project is committed to git and builds cleanly; see the steps in the chat). Left to do: make a Vercel account, run `npx vercel` in the project folder, add the four settings from `.env.local` in Vercel, add `seed.wearebite.org` as a domain plus one DNS record, set the site address in Supabase (Authentication > URL Configuration), then the weekly scout schedule.
 - [ ] **Turn on the research assistant and scout** (built, not yet tried):
   1. In Supabase, open SQL Editor, paste all of `database/update-ai-features.sql`, and click Run.
   2. On the site, go to **Scout** and click **Load full text of the Drive files**.
