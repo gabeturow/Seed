@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { setTopics } from "@/lib/articles";
+import { fillTexts } from "@/lib/fulltext";
 import { cleanUrl, ids, int, text, withMsg } from "@/lib/forms";
 
 function articleFields(fd) {
@@ -21,6 +22,7 @@ function articleFields(fd) {
     summary_needs_review: fd.get("summary_needs_review") === "on",
     admin_notes: text(fd, "admin_notes"),
     internal: fd.get("internal") === "on",
+    pdf_path: text(fd, "pdf_path"),   // set when a PDF was just uploaded; null otherwise (ignored on save)
   };
 }
 
@@ -34,7 +36,7 @@ export async function saveArticle(fd) {
   const { supabase, user } = await requireAdmin();
   const id = int(fd, "id");
   const intent = text(fd, "intent");
-  const back = text(fd, "back") ?? "/";
+  const back = text(fd, "back") ?? "/library";
   const fail = (m) => redirect(withMsg(back, m, "error"));
 
   if (intent === "reject") {
@@ -47,7 +49,13 @@ export async function saveArticle(fd) {
   }
 
   const fields = articleFields(fd);
-  if (!fields.url) fail("Every article needs a link.");
+  if (!fields.url && !fields.pdf_path) {
+    const { data: cur } = id ? await supabase.from("articles").select("pdf_path").eq("id", id).maybeSingle() : { data: null };
+    if (!cur?.pdf_path) fail("Every article needs a link or an uploaded PDF.");
+  }
+  const uploaded = fields.pdf_path;
+  if (!uploaded) delete fields.pdf_path;
+  else if (!fields.url) fields.url = "pending";
 
   if (intent === "create") {
     const { data, error } = await supabase.from("articles").insert({
@@ -55,11 +63,15 @@ export async function saveArticle(fd) {
       submitted_by: user.id, reviewed_by: user.id, reviewed_at: new Date().toISOString(),
     }).select("id").single();
     if (error) fail(error.message);
+    if (uploaded && fields.url === "pending") await supabase.from("articles").update({ url: `/library/${data.id}/pdf` }).eq("id", data.id);
     await setTopics(supabase, data.id, ids(fd, "topic_ids"));
-    done("/", `Added “${fields.title ?? fields.url}” to the library.`);
+    if (!uploaded) await fillTexts(supabase, [{ id: data.id, url: fields.url }]);
+    done("/library", `Added “${fields.title ?? fields.url}” to the library.`);
   }
 
   const update = { ...fields };
+  if (uploaded && update.url === "pending") update.url = `/library/${id}/pdf`;
+  if (!update.url) delete update.url;   // keeps the stored PDF's link when the box was left empty
   if (intent === "approve") Object.assign(update, {
     status: "approved", review_note: text(fd, "review_note"),
     reviewed_by: user.id, reviewed_at: new Date().toISOString(),
@@ -69,15 +81,18 @@ export async function saveArticle(fd) {
   const { error } = await supabase.from("articles").update(update).eq("id", id);
   if (error) fail(error.message);
   await setTopics(supabase, id, ids(fd, "topic_ids"));
+  if (intent === "approve" && fields.url) await fillTexts(supabase, [{ id, url: fields.url }]);   // no-op if it already has text
   done(back, intent === "approve" ? "Approved. It's now in the library." : "Saved.");
 }
 
 export async function deleteArticle(fd) {
   const { supabase } = await requireAdmin();
   if (fd.get("confirm") !== "on") redirect(withMsg(`/admin/articles/${int(fd, "id")}`, "Tick the box to confirm the deletion.", "error"));
+  const { data: gone } = await supabase.from("articles").select("pdf_path").eq("id", int(fd, "id")).maybeSingle();
   const { error } = await supabase.from("articles").delete().eq("id", int(fd, "id"));
+  if (!error && gone?.pdf_path) await supabase.storage.from("article-pdfs").remove([gone.pdf_path]);   // don't leave its PDF behind
   if (error) redirect(withMsg(`/admin/articles/${int(fd, "id")}`, error.message, "error"));
-  done(text(fd, "back") ?? "/", "Deleted the article.");
+  done(text(fd, "back") ?? "/library", "Deleted the article.");
 }
 
 export async function setArticleStatus(fd) {
@@ -132,6 +147,23 @@ export async function deleteTopic(fd) {
   const { supabase } = await requireAdmin();
   await supabase.from("topics").delete().eq("id", int(fd, "id"));
   done("/admin/topics", "Removed the topic from the list and from any articles that had it.");
+}
+
+export async function addSynonyms(fd) {
+  const { supabase } = await requireAdmin();
+  const topic_id = int(fd, "topic_id");
+  const words = [...new Set((text(fd, "synonyms") ?? "").split(",").map((w) => w.trim().toLowerCase()).filter(Boolean))];
+  if (!topic_id || !words.length) redirect(withMsg("/admin/topics", "Type at least one synonym.", "error"));
+  const { error } = await supabase.from("topic_synonyms").upsert(
+    words.map((synonym) => ({ topic_id, synonym })), { onConflict: "topic_id,synonym", ignoreDuplicates: true });
+  if (error) redirect(withMsg("/admin/topics", error.message, "error"));
+  done("/admin/topics", `Added ${words.length === 1 ? "synonym" : "synonyms"}: ${words.join(", ")}.`);
+}
+
+export async function deleteSynonym(fd) {
+  const { supabase } = await requireAdmin();
+  await supabase.from("topic_synonyms").delete().eq("id", int(fd, "id"));
+  done("/admin/topics", "Removed the synonym.");
 }
 
 // ---------- People ----------

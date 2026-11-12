@@ -4,3 +4,10 @@ node_modules
 .DS_Store
 .claude
 *.log
+.vercel
+
+# Local data: copyrighted PDFs and their extracted text
+PJ_Insights Respository/
+database/pdf-text.json
+database/full-text.json
+database/drive-import.json

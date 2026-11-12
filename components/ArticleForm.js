@@ -1,3 +1,4 @@
+import PdfUpload from "./PdfUpload";
 import TopicPicker from "./TopicPicker";
 
 // The full article form used by the admin to add, edit, and review articles.
@@ -10,9 +11,10 @@ export default function ArticleForm({ article = {}, sources, topics, selectedTop
       <input type="hidden" name="back" value={back} />
 
       <div className="grid-2">
-        <label className="span-2">Link <span className="req">required</span>
-          <input name="url" required defaultValue={a.url ?? ""} placeholder="https://" />
+        <label className="span-2">Link <span className="hint">(required unless you upload a PDF below)</span>
+          <input name="url" defaultValue={a.pdf_path ? "" : (a.url ?? "")} placeholder={a.pdf_path ? "Using the stored PDF" : "https://"} />
         </label>
+        <PdfUpload current={!!a.pdf_path} />
         <label className="span-2">Title
           <input name="title" defaultValue={a.title ?? ""} />
         </label>

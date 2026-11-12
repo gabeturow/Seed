@@ -47,12 +47,27 @@ export function DocBody({ doc, scope = "" }) {
         </div>
       )}
 
-      {doc.outside.length > 0 && (
+      {doc.outside.some((w) => w.broad) && (
+        <div className="sources-used unvetted broad">
+          <h2>From the broader web <span className="flag warn">Not vetted</span></h2>
+          <p><strong>These sources are not from the library or its vetted sources, and Bite hasn&apos;t reviewed them.</strong> Check them before relying on them.</p>
+          <ol className="cited">
+            {doc.outside.filter((w) => w.broad).map((w) => (
+              <li key={w.n}>
+                <a href={safeUrl(w.url) ?? "#"} target="_blank" rel="noreferrer">{w.title}</a>
+                <span className="muted small">{w.site}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {doc.outside.some((w) => !w.broad) && (
         <div className="sources-used unvetted">
           <h2>From outside the library <span className="flag warn">Unvetted</span></h2>
           <p className="muted small">Found on the websites of vetted sources, but not reviewed or added to the library.</p>
           <ol className="cited">
-            {doc.outside.map((w) => (
+            {doc.outside.filter((w) => !w.broad).map((w) => (
               <li key={w.n}>
                 <a href={safeUrl(w.url) ?? "#"} target="_blank" rel="noreferrer">{w.title}</a>
                 <span className="muted small">{w.site}</span>

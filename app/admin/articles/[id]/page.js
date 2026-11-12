@@ -23,7 +23,7 @@ export default async function EditArticlePage({ params, searchParams }) {
 
   return (
     <>
-      <p><Link href="/">← Back to the library</Link></p>
+      <p><Link href="/library">← Back to the library</Link></p>
       <section className="card">
         <h1>Edit article</h1>
         <p className="muted">Status: <span className={`status ${a.status}`}>{statusText[a.status]}</span></p>

@@ -21,7 +21,7 @@ export async function shareDoc(rawDoc) {
 }
 
 // ---------- Other ways to see an answer ----------
-const COMMON = `Use only what the answer and the source details below say. Do not add studies, numbers, or claims that are not there. Keep the citations: [A12] for library articles and [W3] for outside (unvetted) results, placed right after the claim they support. Plain, direct language. Light formatting only: short paragraphs, "- " bullets, **bold** sparingly, and "## " headings only where asked.`;
+const COMMON = `Use only what the answer and the source details below say. Do not add studies, numbers, or claims that are not there. Keep the citations: [A12] for library articles and [W3] for outside (unvetted) results, placed right after the claim they support. If the answer carries a warning that some findings come from the broader web and are not from the library, keep that warning, and keep those findings clearly separate. Plain, direct language. Light formatting only: short paragraphs, "- " bullets, **bold** sparingly, and "## " headings only where asked.`;
 
 const KIND_PROMPT = {
   page: `Rewrite the answer as a one-page annotated response of about 400 words.
@@ -50,7 +50,7 @@ export async function reshapeDoc(rawBase, kind) {
       const r = known[a.id];
       return `[A${a.id}] ${r.title}${r.authors ? ` - ${r.authors}` : ""}${r.publication_year ? `, ${r.publication_year}` : ""}${r.resource_type ? ` (${r.resource_type})` : ""}\nSummary: ${r.summary ?? "(none)"}`;
     }),
-    ...base.outside.map((w) => `[W${w.n}] ${w.title} (${w.site}) - outside the library, unvetted`),
+    ...base.outside.map((w) => `[W${w.n}] ${w.title} (${w.site}) - ${w.broad ? "from the broader web, not from the library or its vetted sources, unreviewed" : "outside the library, unvetted"}`),
   ].join("\n\n");
 
   try {

@@ -44,9 +44,9 @@ export default async function RootLayout({ children }) {
             </Link>
             {approved && (
               <nav className="nav">
-                <Link href="/">Library</Link>
                 <Link href="/ask">Ask</Link>
-                <Link href="/submit">Suggest an article</Link>
+                <Link href="/library">Library</Link>
+                {!isAdmin && <Link href="/submit">Suggest</Link>}
                 {isAdmin && (
                   <>
                     <Link href="/admin/review">

@@ -180,6 +180,8 @@ blockquote { margin: 6px 0; padding-left: 12px; border-left: 3px solid var(--cor
 
 /* Research assistant */
 .ask-form textarea { resize: vertical; }
+.ask-top { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 720px) { .ask-top { grid-template-columns: 1fr; gap: 16px; } }
 .ask-row { display: flex; gap: 14px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
 .button:disabled { opacity: .6; cursor: progress; }
 .examples { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
@@ -207,13 +209,15 @@ blockquote { margin: 6px 0; padding-left: 12px; border-left: 3px solid var(--cor
 }
 
 /* Answer length slider on the Ask page */
-.length-slider { margin: 4px 0 14px; max-width: 420px; }
+.length-slider { margin: 0; }
 .length-slider input[type="range"] { width: 100%; padding: 0; accent-color: var(--accent); }
 .length-labels { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); }
 
 /* Ways to see an answer, and copy / download / share */
 .views { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 14px; }
 .view-tab { font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 999px; padding: 4px 14px; }
+a.view-tab { text-decoration: none; }
+a.view-tab:hover { text-decoration: none; }
 .view-tab.on { background: var(--accent); color: var(--accent-ink); }
 .view-tab:disabled { opacity: .6; cursor: progress; }
 .doc-title { font-size: 1.3rem; margin: 0 0 8px; }
@@ -237,3 +241,70 @@ blockquote { margin: 6px 0; padding-left: 12px; border-left: 3px solid var(--cor
 .section-title { margin: 28px 0 4px; }
 .email-add { margin-top: 14px; }
 .internal-check { font-weight: 600; }
+
+.topic-block { display: grid; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--line, #e5e2da); }
+.synonyms { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; font-size: .85rem; padding-left: 4px; }
+.synonym { display: inline-flex; align-items: center; gap: 2px; background: var(--accent-soft); padding: 1px 4px 1px 9px; border-radius: 999px; }
+.synonym .link-button { padding: 0 4px; }
+.synonym-add { display: inline-flex; gap: 6px; align-items: center; }
+.synonym-add input { min-width: 220px; padding: 3px 8px; font-size: .85rem; }
+
+/* ---------- Discuss an article ---------- */
+.back { margin: 0 0 8px; font-size: .9rem; }
+.article-title { font-size: 1.5rem; margin: 0 0 6px; }
+.discuss { margin-top: 28px; }
+.discuss h2 { margin-bottom: 4px; }
+.discuss-box { display: grid; gap: 14px; margin-top: 12px; }
+.starters { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { background: var(--accent-soft); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: .88rem; cursor: pointer; }
+.chip:disabled { opacity: .6; cursor: default; }
+.thread { display: grid; gap: 12px; }
+.msg { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; background: var(--card); }
+.msg.user { background: var(--accent-soft); border-color: transparent; }
+.msg .who { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+.msg p { margin: 0 0 8px; } .msg p:last-child { margin-bottom: 0; }
+.msg ul { margin: 0 0 8px 1.1em; padding: 0; }
+.discuss-form { display: grid; gap: 8px; }
+.discuss-form textarea { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+.discuss-form .button { justify-self: end; }
+.discuss-link { margin-left: 10px; }
+
+.dictate { display: inline-block; margin-top: 6px; font-size: .85rem; }
+.dictate-btn { display: inline-flex; align-items: center; gap: 6px; }
+.dictate-btn.on { color: #b3261e; font-weight: 600; }
+.discuss-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+
+/* ---------- Follow-ups on an Ask answer ---------- */
+.followup { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+.followup-form { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+.followup-form label { display: grid; gap: 4px; font-weight: 600; }
+.followup-form textarea { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+.followup-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.followup-row .button { margin-left: auto; }
+.followup-row select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
+
+/* ---------- Go deeper ---------- */
+.deeper { margin: 8px 0 12px; padding: 12px 14px; border-left: 3px solid var(--chartreuse); background: #fafaf0; }
+.deeper-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.deeper-text p { margin: 0 0 10px; } .deeper-text ul { margin: 0 0 10px 1.1em; padding: 0; }
+.deep-h { font-size: 1rem; margin: 14px 0 4px; color: var(--accent); }
+
+/* Scout: "Update everything" progress */
+.update-all { display: grid; gap: 10px; justify-items: start; }
+.update-log { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: .9rem; }
+.update-log li.bad { color: var(--danger); }
+
+/* Article page: reading views */
+.article-views { display: grid; gap: 12px; }
+
+.bar-label { font-size: .85rem; font-weight: 600; color: var(--muted, inherit); }
+
+.card-links { display: flex; gap: 16px; margin: 4px 0 10px; font-size: .9rem; }
+.card-links a { color: var(--ink); text-decoration: underline; }
+
+/* Bold lead-ins in the longer summaries stand out in the accent color (yellow in dark mode) */
+.deeper-text strong { color: var(--accent); }
+.card-links button.link-button { font-size: inherit; }
+.card-ask { display: grid; gap: 8px; margin-top: 12px; }
+.card-ask textarea { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+.card-thread { margin-top: 12px; }

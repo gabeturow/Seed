@@ -1,8 +1,10 @@
 "use client";
+import DictateButton from "./DictateButton";
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
-import { askLibrary } from "@/app/ask/actions";
+import { askFollowUp, askLibrary } from "@/app/ask/actions";
 import { reshapeDoc } from "@/app/ask/doc-actions";
 import { DocActions, DocBody } from "@/components/AnswerDoc";
+import { withFollowUps } from "@/lib/doc";
 
 const EXAMPLES = [
   "What's the evidence that taste-focused menu names increase vegetable choices?",
@@ -26,6 +28,25 @@ function Answer({ r, id }) {
   const [pending, start] = useTransition();
   const card = useRef(null);
   const doc = docs[view];
+  const [turns, setTurns] = useState([]);   // follow-up questions and answers
+  const [fLen, setFLen] = useState("paragraph");
+  const [fError, setFError] = useState("");
+  const [fPending, fStart] = useTransition();
+  const fbox = useRef(null);
+
+  function followUp(e) {
+    e.preventDefault();
+    const q = fbox.current.value.trim();
+    if (!q || fPending) return;
+    setFError("");
+    fStart(async () => {
+      const prior = [r, ...turns].map((t) => ({ question: t.question, answer: t.answer, outside: t.outside }));
+      const res = await askFollowUp(q, fLen, prior);
+      if (res?.error) return setFError(res.error);
+      setTurns((t) => [...t, res]);
+      fbox.current.value = "";
+    });
+  }
 
   const show = (kind) => {
     setError("");
@@ -52,7 +73,33 @@ function Answer({ r, id }) {
       </div>
       {error && <p className="notice error" role="alert">{error}</p>}
       <DocBody doc={doc} scope={`${id}-`} />
-      <DocActions doc={doc} printRef={card} />
+      <DocActions doc={withFollowUps(doc, turns)} printRef={card} />
+
+      {turns.map((t, i) => (
+        <section key={i} className="followup">
+          <p className="asked">{t.question}</p>
+          <DocBody doc={{ kind: "answer", title: t.question, question: t.question, body: t.answer, library: t.library, outside: t.outside }} scope={`${id}-f${i}-`} />
+        </section>
+      ))}
+      {turns.length < 5 ? (
+        <form className="followup-form no-print" onSubmit={followUp}>
+          <label>
+            Ask a follow-up
+            <textarea ref={fbox} rows={2} maxLength={2000} placeholder="Probe further, or ask about one of the sources above…"
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); e.currentTarget.form.requestSubmit(); } }} />
+          </label>
+          <div className="followup-row">
+            <DictateButton target={fbox} />
+            <select value={fLen} onChange={(e) => setFLen(e.target.value)} aria-label="Length of the follow-up answer">
+              <option value="paragraph">1 paragraph</option>
+              <option value="page">1 page</option>
+              <option value="five">5 pages</option>
+            </select>
+            <button className="button" disabled={fPending}>{fPending ? "Researching…" : "Ask"}</button>
+          </div>
+          {fError && <p className="notice error" role="alert">{fError}</p>}
+        </form>
+      ) : <p className="muted small no-print">That&apos;s five follow-ups. Ask a new question above to keep going.</p>}
     </article>
   );
 }
@@ -76,11 +123,13 @@ export default function AskForm() {
   return (
     <>
       <form action={action} className="card ask-form">
-        <label>
+        <div className="ask-top">
+        <label className="ask-question">
           Your question
           <textarea ref={box} name="question" rows={3} required maxLength={2000}
             placeholder="For example: what menu language makes plant-based dishes more appealing?"
             onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) e.currentTarget.form.requestSubmit(); }} />
+          <DictateButton target={box} />
         </label>
         <div className="length-slider">
           <label htmlFor="length-range">Length of the answer: <strong>{LENGTHS[len].label}</strong></label>
@@ -89,6 +138,7 @@ export default function AskForm() {
           <datalist id="length-ticks">{LENGTHS.map((l, i) => <option key={l.key} value={i} label={l.label} />)}</datalist>
           <div className="length-labels" aria-hidden="true">{LENGTHS.map((l) => <span key={l.key}>{l.label}</span>)}</div>
           <input type="hidden" name="length" value={LENGTHS[len].key} />
+        </div>
         </div>
         <div className="ask-row">
           <button className="button" disabled={pending}>{pending ? "Researching…" : "Ask"}</button>
