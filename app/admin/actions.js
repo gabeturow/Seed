@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { setTopics } from "@/lib/articles";
-import { fillTexts } from "@/lib/fulltext";
+import { fillTexts, pdfBufferText } from "@/lib/fulltext";
 import { cleanUrl, ids, int, text, withMsg } from "@/lib/forms";
 
 function articleFields(fd) {
@@ -24,6 +24,18 @@ function articleFields(fd) {
     internal: fd.get("internal") === "on",
     pdf_path: text(fd, "pdf_path"),   // set when a PDF was just uploaded; null otherwise (ignored on save)
   };
+}
+
+// A PDF was just uploaded for this article: read its text so the assistant can use it (replaces any older text).
+async function textFromUpload(supabase, id, path) {
+  try {
+    const { data: blob } = await supabase.storage.from("article-pdfs").download(path);
+    if (!blob) return false;
+    const text = await pdfBufferText(Buffer.from(await blob.arrayBuffer()));
+    if (!text) return false;
+    const { error } = await supabase.from("articles").update({ full_text: text }).eq("id", id);
+    return !error;
+  } catch { return false; }
 }
 
 const done = (back, msg) => {
@@ -65,7 +77,8 @@ export async function saveArticle(fd) {
     if (error) fail(error.message);
     if (uploaded && fields.url === "pending") await supabase.from("articles").update({ url: `/library/${data.id}/pdf` }).eq("id", data.id);
     await setTopics(supabase, data.id, ids(fd, "topic_ids"));
-    if (!uploaded) await fillTexts(supabase, [{ id: data.id, url: fields.url }]);
+    if (uploaded) await textFromUpload(supabase, data.id, uploaded);
+    else await fillTexts(supabase, [{ id: data.id, url: fields.url }]);
     done("/library", `Added “${fields.title ?? fields.url}” to the library.`);
   }
 
@@ -81,7 +94,8 @@ export async function saveArticle(fd) {
   const { error } = await supabase.from("articles").update(update).eq("id", id);
   if (error) fail(error.message);
   await setTopics(supabase, id, ids(fd, "topic_ids"));
-  if (intent === "approve" && fields.url) await fillTexts(supabase, [{ id, url: fields.url }]);   // no-op if it already has text
+  if (uploaded) await textFromUpload(supabase, id, uploaded);
+  else if (intent === "approve" && fields.url) await fillTexts(supabase, [{ id, url: fields.url }]);   // no-op if it already has text
   done(back, intent === "approve" ? "Approved. It's now in the library." : "Saved.");
 }
 
