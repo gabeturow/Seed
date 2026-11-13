@@ -14,6 +14,7 @@ export default function IngestStatus() {
   const lastKick = useRef(0);
   const lastCiteKick = useRef(0);
   const lastBgKick = useRef(0);
+  const wasBusy = useRef(false);
   const timer = useRef(null);
 
   const refresh = useCallback(async () => {
@@ -39,7 +40,10 @@ export default function IngestStatus() {
       lastBgKick.current = Date.now();
       fetch("/api/bg/run", { method: "POST" }).catch(() => {});
     }
-    return queued || running || citeQueued || citeRunning || bgQueued || bgRunning ? 3_000 : 20_000;
+    const busy = !!(queued || running || citeQueued || citeRunning || bgQueued || bgRunning);
+    if (wasBusy.current && !busy) setOpen(false);   // everything finished and the queue is empty: fold the panel away
+    wasBusy.current = busy;
+    return busy ? 3_000 : 20_000;
   }, []);
 
   useEffect(() => {
