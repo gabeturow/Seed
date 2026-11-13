@@ -6,7 +6,10 @@ import AskForm from "@/components/AskForm";
 export const maxDuration = 300;
 
 export default async function AskPage() {
-  await requireApproved();
+  const { supabase, user } = await requireApproved();
+  // This person's saved conversations, newest first. If the table isn't set up yet, there are none.
+  const { data: saved, error } = await supabase.from("ask_threads").select("id, turns, updated_at")
+    .eq("user_id", user.id).order("updated_at", { ascending: false }).limit(25);
   return (
     <>
       <section className="intro">
@@ -17,7 +20,7 @@ export default async function AskPage() {
           websites and lists those results separately as unvetted.
         </p>
       </section>
-      {hasClaudeKey ? <AskForm /> : (
+      {hasClaudeKey ? <AskForm saved={error ? [] : (saved ?? [])} /> : (
         <div className="card"><p>The research assistant isn't set up yet: the Anthropic API key is missing from <code>.env.local</code>.</p></div>
       )}
     </>

@@ -308,3 +308,8 @@ a.view-tab:hover { text-decoration: none; }
 .card-ask { display: grid; gap: 8px; margin-top: 12px; }
 .card-ask textarea { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
 .card-thread { margin-top: 12px; }
+
+/* Saved Ask conversations */
+.earlier { margin-top: 32px; }
+.earlier-item { margin: 10px 0; }
+.earlier-item > summary { cursor: pointer; font-weight: 600; padding: 8px 0; }

@@ -3,6 +3,7 @@ import DictateButton from "./DictateButton";
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { askFollowUp, askLibrary } from "@/app/ask/actions";
 import { reshapeDoc } from "@/app/ask/doc-actions";
+import { deleteThread, saveThread } from "@/app/ask/threads";
 import { DocActions, DocBody } from "@/components/AnswerDoc";
 import { withFollowUps } from "@/lib/doc";
 
@@ -20,7 +21,7 @@ const VIEWS = [
 ];
 
 // One answer, with ways to see it (answer, annotated page, memo, bibliography) and to copy, download, or share it.
-function Answer({ r, id }) {
+function Answer({ r, id, saved = null, onDelete }) {
   const base = { kind: "answer", title: r.question, question: r.question, body: r.answer, library: r.library, outside: r.outside };
   const [docs, setDocs] = useState({ answer: base });
   const [view, setView] = useState("answer");
@@ -28,7 +29,23 @@ function Answer({ r, id }) {
   const [pending, start] = useTransition();
   const card = useRef(null);
   const doc = docs[view];
-  const [turns, setTurns] = useState([]);   // follow-up questions and answers
+  const [turns, setTurns] = useState(saved ? saved.turns.slice(1) : []);   // follow-up questions and answers
+  const [threadId, setThreadId] = useState(saved ? saved.id : null);
+  const [saveNote, setSaveNote] = useState("");
+  const saving = useRef(false);
+
+  // Saves the conversation to the person's account: once when a new answer appears, again after each follow-up.
+  async function persist(all) {
+    const res = await saveThread(threadId, all);
+    if (res?.id) { setThreadId(res.id); setSaveNote(""); }
+    else if (res?.error) setSaveNote(res.error);
+    return res;
+  }
+  useEffect(() => {
+    if (saved || saving.current) return;
+    saving.current = true;
+    persist([r]);
+  }, []);   // eslint-disable-line react-hooks/exhaustive-deps
   const [fLen, setFLen] = useState("paragraph");
   const [fError, setFError] = useState("");
   const [fPending, fStart] = useTransition();
@@ -45,6 +62,7 @@ function Answer({ r, id }) {
       if (res?.error) return setFError(res.error);
       setTurns((t) => [...t, res]);
       fbox.current.value = "";
+      await persist([r, ...turns, res]);
     });
   }
 
@@ -81,6 +99,8 @@ function Answer({ r, id }) {
           <DocBody doc={{ kind: "answer", title: t.question, question: t.question, body: t.answer, library: t.library, outside: t.outside }} scope={`${id}-f${i}-`} />
         </section>
       ))}
+      {saveNote && <p className="notice error no-print" role="alert">{saveNote}</p>}
+      {threadId && onDelete && <p className="no-print"><button type="button" className="link-button" onClick={() => onDelete(threadId)}>Delete this conversation</button></p>}
       {turns.length < 5 ? (
         <form className="followup-form no-print" onSubmit={followUp}>
           <label>
@@ -110,9 +130,15 @@ const LENGTHS = [
   { key: "five", label: "5 pages" },
 ];
 
-export default function AskForm() {
+export default function AskForm({ saved = [] }) {
   const [state, action, pending] = useActionState(askLibrary, null);
   const [history, setHistory] = useState([]);
+  const [earlier, setEarlier] = useState(saved);
+  async function remove(id) {
+    if (!window.confirm("Delete this saved conversation?")) return;
+    const res = await deleteThread(id);
+    if (res?.ok) setEarlier((e) => e.filter((t) => t.id !== id));
+  }
   const box = useRef(null);
   const [len, setLen] = useState(1);
 
@@ -155,6 +181,18 @@ export default function AskForm() {
         {state?.error && <p className="notice error" role="alert">{state.error}</p>}
       </form>
       {history.map((r, i) => <Answer key={history.length - i} id={history.length - i} r={r} />)}
+      {earlier.length > 0 && (
+        <section className="earlier">
+          <h2>Your earlier questions</h2>
+          <p className="muted small">Saved to your account. Only you can see them.</p>
+          {earlier.map((t) => (
+            <details key={t.id} className="earlier-item">
+              <summary>{t.turns[0].question}{t.turns.length > 1 ? ` (+${t.turns.length - 1} follow-up${t.turns.length > 2 ? "s" : ""})` : ""}</summary>
+              <Answer r={t.turns[0]} id={1000 + t.id} saved={t} onDelete={remove} />
+            </details>
+          ))}
+        </section>
+      )}
     </>
   );
 }
