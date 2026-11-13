@@ -67,7 +67,18 @@ export async function saveArticle(fd) {
   }
   const uploaded = fields.pdf_path;
   if (!uploaded) delete fields.pdf_path;
-  else if (!fields.url) fields.url = "pending";
+  else {
+    // An uploaded PDF always becomes the article's link (the old web link, if any, is kept in the notes).
+    const old = fields.url && !fields.url.startsWith("/library/") ? fields.url : null;
+    if (old) {
+      let cur = null;
+      if (id) ({ data: cur } = await supabase.from("articles").select("admin_notes").eq("id", id).maybeSingle());
+      const note = `Original link: ${old}`;
+      const base = fields.admin_notes ?? cur?.admin_notes ?? "";
+      if (!base.includes(note)) fields.admin_notes = [base, note].filter(Boolean).join("\n");
+    }
+    fields.url = "pending";
+  }
 
   if (intent === "create") {
     const { data, error } = await supabase.from("articles").insert({
