@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getViewer } from "@/lib/auth";
 import { isConfigured } from "@/lib/supabase";
 import { signOut } from "./auth-actions";
+import IngestStatus from "@/components/IngestStatus";
 
 // Every page depends on who is signed in, so never serve a saved copy.
 export const dynamic = "force-dynamic";
@@ -74,6 +75,7 @@ export default async function RootLayout({ children }) {
         <main className="wrap main">
           {isConfigured ? children : <SetupNeeded />}
         </main>
+        {isAdmin && <IngestStatus />}
       </body>
     </html>
   );

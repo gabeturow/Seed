@@ -313,3 +313,16 @@ a.view-tab:hover { text-decoration: none; }
 .earlier { margin-top: 32px; }
 .earlier-item { margin: 10px 0; }
 .earlier-item > summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+
+/* Background "Add an article" panel (admin) */
+.ingest-panel { position: fixed; right: 16px; bottom: 16px; z-index: 50; width: min(380px, calc(100vw - 32px)); background: var(--bg, #fff); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.14); }
+.ingest-head { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: space-between; padding: 10px 14px; font: inherit; font-weight: 600; background: none; border: 0; cursor: pointer; text-align: left; color: inherit; }
+.ingest-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; animation: ingest-pulse 1.2s ease-in-out infinite; }
+@keyframes ingest-pulse { 50% { opacity: .25; } }
+.ingest-body { max-height: 50vh; overflow: auto; padding: 0 14px 12px; border-top: 1px solid var(--line); }
+.ingest-body ul { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 6px; }
+.job { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: .88rem; align-items: baseline; }
+.job-state { font-weight: 600; min-width: 4.5em; }
+.job.failed .job-state { color: #a02a2a; }
+.job-label { overflow-wrap: anywhere; }
+.job-msg { flex-basis: 100%; color: var(--muted, #666); font-size: .82rem; }

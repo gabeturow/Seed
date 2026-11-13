@@ -3,7 +3,6 @@ import ArticleForm from "@/components/ArticleForm";
 import Notice from "@/components/Notice";
 import IngestForm from "@/components/IngestForm";
 import { saveArticle } from "../../actions";
-import { addArticleFromSource } from "../../ingest";
 
 export const maxDuration = 300;
 
@@ -17,9 +16,9 @@ export default async function NewArticlePage({ searchParams }) {
   return (
     <section className="card">
       <h1>Add an article</h1>
-      <p className="muted">Paste a link or upload a PDF. The title, authors, date, citation, source, topics and the short, one-page and five-page summaries are filled in for you, and the article goes straight into the library. You can fix anything afterward.</p>
+      <p className="muted">Paste links (one per line or separated by commas), or upload PDFs or a whole folder of them. Each one is added in the background, so you don't have to wait. The title, authors, date, citation, source, topics and the short, one-page and five-page summaries are filled in for you, and the article goes straight into the library. You can fix anything afterward in the panel's links.</p>
       <Notice sp={sp} />
-      <IngestForm action={addArticleFromSource} />
+      <IngestForm />
       <details style={{ marginTop: "2rem" }}>
         <summary>Or enter everything by hand</summary>
         <ArticleForm sources={sources ?? []} topics={topics ?? []} action={saveArticle} mode="new" back="/admin/articles/new" />
