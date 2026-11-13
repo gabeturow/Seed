@@ -18,3 +18,4 @@ alter table public.ingest_jobs enable row level security;
 drop policy if exists "ingest_jobs: admin" on public.ingest_jobs;
 create policy "ingest_jobs: admin" on public.ingest_jobs for all to authenticated
   using (public.is_admin()) with check (public.is_admin());
+alter table public.ingest_jobs add column if not exists to_review boolean not null default false;  -- 'Send to review queue' option

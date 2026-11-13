@@ -7,7 +7,7 @@ import { cleanUrl } from "@/lib/forms";
 const MAX_PER_BATCH = 100;
 
 // links: free text, separated by commas, spaces or new lines. pdfs: [{ path, name }] already uploaded to storage.
-export async function queueArticles({ links = "", pdfs = [] } = {}) {
+export async function queueArticles({ links = "", pdfs = [], review = false } = {}) {
   const { supabase } = await requireAdmin();
   const bad = [];
   const urls = [...new Set(String(links).split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean))]
@@ -15,8 +15,8 @@ export async function queueArticles({ links = "", pdfs = [] } = {}) {
     .filter(Boolean);
   const files = (Array.isArray(pdfs) ? pdfs : []).filter((f) => f && typeof f.path === "string" && /^[\w-]+\.pdf$/i.test(f.path));
   const rows = [
-    ...urls.map((url) => ({ url, label: url })),
-    ...files.map((f) => ({ pdf_path: f.path, label: String(f.name ?? f.path).slice(0, 200) })),
+    ...urls.map((url) => ({ url, label: url, to_review: !!review })),
+    ...files.map((f) => ({ pdf_path: f.path, label: String(f.name ?? f.path).slice(0, 200), to_review: !!review })),
   ].slice(0, MAX_PER_BATCH);
   if (!rows.length) return { error: bad.length ? `That doesn't look like a link: ${bad[0]}` : "Paste at least one link or choose some PDFs." };
   const { error } = await supabase.from("ingest_jobs").insert(rows);

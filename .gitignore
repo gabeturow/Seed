@@ -11,3 +11,5 @@ PJ_Insights Respository/
 database/pdf-text.json
 database/full-text.json
 database/drive-import.json
+database/new-for-review/
+database/missing-pdfs/

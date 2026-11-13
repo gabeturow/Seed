@@ -9,6 +9,7 @@ const MAX_BYTES = 50 * 1024 * 1024;
 // Everything is put on a queue and processed in the background, so the person is free to move on at once.
 export default function IngestForm() {
   const [links, setLinks] = useState("");
+  const [review, setReview] = useState(false);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [progress, setProgress] = useState("");
@@ -38,7 +39,7 @@ export default function IngestForm() {
         const { error } = await client.storage.from("article-pdfs").upload(name, f, { contentType: "application/pdf" });
         if (error) failed++;
         else {
-          const res = await queueArticles({ pdfs: [{ path: name, name: f.name }] });   // queued as soon as it's uploaded
+          const res = await queueArticles({ pdfs: [{ path: name, name: f.name }], review });   // queued as soon as it's uploaded
           if (res?.queued) { queued += res.queued; window.dispatchEvent(new Event("ingest-queued")); } else failed++;
         }
         done++;
@@ -63,7 +64,7 @@ export default function IngestForm() {
     setMsg(""); setErr("");
     if (!links.trim()) return setErr("Paste at least one link, or choose PDFs below.");
     start(async () => {
-      const res = await queueArticles({ links });
+      const res = await queueArticles({ links, review });
       if (res?.error) return setErr(res.error);
       setLinks("");
       setMsg(note(res.queued, res.skipped));
@@ -73,6 +74,7 @@ export default function IngestForm() {
 
   return (
     <div className="stack">
+      <label className="check"><input type="checkbox" checked={review} onChange={(e) => setReview(e.target.checked)} /> Send to the review queue instead of publishing right away</label>
       <form onSubmit={submitLinks} className="stack">
         <label>Links
           <textarea rows={5} value={links} onChange={(e) => setLinks(e.target.value)}
