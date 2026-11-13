@@ -6,5 +6,7 @@ export async function GET() {
   const since = new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString();
   const { data } = await supabase.from("ingest_jobs").select("id, status, label, url, message, article_id, created_at")
     .gte("created_at", since).order("id", { ascending: false }).limit(40);
-  return Response.json({ jobs: data ?? [] });
+  const { data: runs } = await supabase.from("cite_runs").select("id, status, phase, message, scanned, processed, added, how_many, created_at")
+    .gte("created_at", since).order("id", { ascending: false }).limit(1);   // null/empty if the table isn't set up
+  return Response.json({ jobs: data ?? [], cite: runs?.[0] ?? null });
 }
