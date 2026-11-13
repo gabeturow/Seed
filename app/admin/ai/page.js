@@ -4,8 +4,9 @@ import { hasClaudeKey, vettedSites } from "@/lib/claude";
 import Notice from "@/components/Notice";
 import CitationFinder from "@/components/CitationFinder";
 import UpdateAll from "@/components/UpdateAll";
+import ScoutRunner from "@/components/ScoutRunner";
 import { citedStatus } from "./cited";
-import { addPdfArticles, attachPdfText, fetchMissingText, importDriveArticles, libraryStatus, redraftSummaries, removeUnusedPdfs, scoutThemeInfo, runScout, uploadArticlePdfs } from "./actions";
+import { addPdfArticles, attachPdfText, fetchMissingText, importDriveArticles, libraryStatus, redraftSummaries, removeUnusedPdfs, scoutThemeInfo, uploadArticlePdfs } from "./actions";
 
 export const maxDuration = 300;
 
@@ -55,17 +56,7 @@ export default async function AiPage({ searchParams }) {
           {lastRun ? `, last checked ${new Date(lastRun).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : ""}, one
           theme per run so it goes deep, and puts what it finds in the review queue. A run takes a few minutes and costs roughly $2–3.
         </p>
-        <form action={runScout}>
-          <p>
-            <label>Theme{" "}
-              <select name="theme" defaultValue={themes.find((t) => t.thinnest)?.key}>
-                {themes.map((t) => <option key={t.key} value={t.key}>{t.name} ({t.count} articles){t.thinnest ? " — fewest" : ""}</option>)}
-                <option value="all">All themes at once (broad)</option>
-              </select>
-            </label>
-          </p>
-          <button className="button secondary" disabled={!hasClaudeKey || !sites.length}>Run the scout</button>
-        </form>
+        <ScoutRunner themes={themes} defaultTheme={themes.find((t) => t.thinnest)?.key} disabled={!hasClaudeKey || !sites.length} />
       </section>
 
       <section className="card">
