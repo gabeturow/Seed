@@ -13,3 +13,4 @@ database/full-text.json
 database/drive-import.json
 database/new-for-review/
 database/missing-pdfs/
+database/attach-ready/
