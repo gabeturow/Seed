@@ -89,7 +89,7 @@ export async function saveArticle(fd) {
     if (uploaded && fields.url === "pending") await supabase.from("articles").update({ url: `/library/${data.id}/pdf` }).eq("id", data.id);
     await setTopics(supabase, data.id, ids(fd, "topic_ids"));
     if (uploaded) await textFromUpload(supabase, data.id, uploaded);
-    else await fillTexts(supabase, [{ id: data.id, url: fields.url }]);
+    else await fillTexts(supabase, [{ id: data.id, url: fields.url, title: fields.title }]);
     done("/library", `Added “${fields.title ?? fields.url}” to the library.`);
   }
 
@@ -106,7 +106,7 @@ export async function saveArticle(fd) {
   if (error) fail(error.message);
   await setTopics(supabase, id, ids(fd, "topic_ids"));
   if (uploaded) await textFromUpload(supabase, id, uploaded);
-  else if (intent === "approve" && fields.url) await fillTexts(supabase, [{ id, url: fields.url }]);   // no-op if it already has text
+  else if (intent === "approve" && fields.url) await fillTexts(supabase, [{ id, url: fields.url, title: fields.title }]);   // no-op if it already has text
   done(back, intent === "approve" ? "Approved. It's now in the library." : "Saved.");
 }
 
