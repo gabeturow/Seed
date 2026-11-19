@@ -13,6 +13,13 @@
   5. Optional: share an Ask answer that uses the internal article from your account; the public account shouldn't be able to open the link.
   6. Move the email to the **BITE staff** list. The internal article should now appear.
 
+## Hosting
+- [ ] **Squarespace CNAME:** in Squarespace's DNS settings for wearebite.org, add a CNAME record with host `seed`, pointing to the value Vercel shows under Project > Settings > Domains (usually `cname.vercel-dns.com`). As of 2026-11-19, `seed.wearebite.org` doesn't resolve yet.
+- [ ] **Supabase Site URL:** in Supabase, open Authentication > URL Configuration, set Site URL to `https://seed.wearebite.org`, and add it under Redirect URLs, so sign-up and sign-in emails link to the live site rather than localhost.
+- [ ] **Email sender (Resend):** make a Resend account, verify wearebite.org there (it adds a few DNS records in Squarespace), then put Resend's SMTP details into Supabase (Authentication > Emails > SMTP Settings). Supabase's built-in sender is rate-limited and lands in spam.
+- [ ] **Weekly scout schedule:** make the scout run on its own once a week, for example with a Vercel cron job that calls the background-job route.
+- [ ] **Vercel 2FA:** turn on two-factor sign-in under Vercel Account Settings > Authentication.
+
 ## Reminders
 - [ ] **The Anthropic API key expires in January 2027.** Before then, make a new key at console.anthropic.com, paste it into `.env.local` (and into the hosting settings once the site is online), and restart the site. The research assistant and the scout stop working until the new key is in.
 
@@ -33,5 +40,4 @@
   4. Re-run `database/update-ai-features.sql` in Supabase (it now also adds the table for share links), then try **Share link** on an answer and open it in a private window with a second approved account.
 - [ ] **Staff vs. public access (built, needs one SQL step):** in Supabase, paste all of `database/update-access.sql` and click Run. Then on **People**, add emails to the BITE staff list and the Public list. Mark internal articles with the "Internal" checkbox when editing or reviewing them (the four internal or client items above are good candidates). Test with a second account on the public list: it should not see internal articles in the library, in Ask, or in shared links. Also turn on "Confirm email" in Supabase (Authentication > Providers > Email) so a listed address can't be claimed by someone who doesn't own it.
 - [ ] **Drive import, batches 1 and 2:** on **Scout**, click "Add the Drive articles to the review queue" (now 34 articles; run it from the site on your computer, localhost:3000, which has the saved files), then review them under Review. Afterward, decide whether to import the rest of the Drive folder (only about 4 in 10 shortcuts are readable; the rest need to be shared with the connected Google account).
-- [ ] Check the source websites on the Sources page. About 20 obscure sources have no website yet.
-- [ ] Make the scout run weekly on its own (after the site is online).
+- [ ] Source websites: all filled in except **Luminas**.
