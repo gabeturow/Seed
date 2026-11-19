@@ -140,6 +140,15 @@ export async function setArticleStatus(fd) {
   done(text(fd, "back") ?? "/admin/review", "Updated.");
 }
 
+export async function approveAllPending() {
+  const { supabase, user } = await requireAdmin();
+  const { data, error } = await supabase.from("articles").update({
+    status: "approved", reviewed_by: user.id, reviewed_at: new Date().toISOString(),
+  }).eq("status", "pending").select("id");
+  if (error) redirect(withMsg("/admin/review", error.message, "error"));
+  done("/admin/review", `Approved ${data?.length ?? 0} article${data?.length === 1 ? "" : "s"}. They're now in the library.`);
+}
+
 // ---------- Sources ----------
 export async function saveSource(fd) {
   const { supabase } = await requireAdmin();

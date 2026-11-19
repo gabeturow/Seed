@@ -3,7 +3,7 @@ import { loadTopicsFor } from "@/lib/articles";
 import ArticleForm from "@/components/ArticleForm";
 import Notice from "@/components/Notice";
 import ConfirmButton from "@/components/ConfirmButton";
-import { deleteArticle, saveArticle, setArticleStatus } from "../actions";
+import { deleteArticle, approveAllPending, saveArticle, setArticleStatus } from "../actions";
 
 const originLabel = { partner: "Suggested by", scout: "Found by the weekly scout", import: "Imported", admin: "Added by" };
 
@@ -28,6 +28,14 @@ export default async function ReviewPage({ searchParams }) {
         Nothing joins the library until you approve it. You can fix the title, summary, topics, or anything else first.
       </p>
       <Notice sp={sp} />
+      {list.length > 1 && (
+        <form action={approveAllPending}>
+          <ConfirmButton className="button"
+            message={`Approve all ${list.length} articles waiting in the queue? They'll join the library as they are now.`}>
+            Approve all ({list.length})
+          </ConfirmButton>
+        </form>
+      )}
       {list.length === 0 && <div className="empty"><p>All caught up. There's nothing waiting for review.</p></div>}
 
       {list.map((a) => (
