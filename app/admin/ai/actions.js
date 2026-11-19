@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { withMsg } from "@/lib/forms";
-import { SCOUT_THEMES, themeCounts, importDrive, attachPdfs, fetchTexts, redraftBatch, uploadPdfs, addPdfs, cleanPdfs, unmatchedPdfs, safe } from "@/lib/ai-core";
+import { SCOUT_THEMES, themeCounts, importDrive, attachPdfs, fetchTexts, redraftBatch, uploadPdfs, addPdfs, cleanPdfs, unmatchedPdfs, normText, safe } from "@/lib/ai-core";
 
 const BACK = "/admin/ai";
 const finish = (r) => redirect(withMsg(r.to ?? BACK, r.text, r.ok ? "msg" : "error"));
@@ -46,14 +46,17 @@ export async function libraryStatus() {
   const [{ data: arts }, total, noText, noSummaries, pending] = await Promise.all([
     supabase.from("articles").select("url, title, admin_notes"),
     count(supabase.from("articles").select("id", { count: "exact", head: true })),
-    count(supabase.from("articles").select("id", { count: "exact", head: true }).is("full_text", null)),
+    supabase.from("articles").select("id, title").is("full_text", null).order("id").then((r) => r.data ?? [], () => []),
     count(supabase.from("articles").select("id", { count: "exact", head: true }).not("full_text", "is", null).is("summary_page", null)),
     count(supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "pending")),
   ]);
   const urls = (arts ?? []).map((a) => a.url ?? "");
+  // A stored PDF replaces the Drive link, so also match by title (as the import itself does).
+  const titles = new Set((arts ?? []).map((a) => normText(a.title)).filter(Boolean));
   return {
-    total, noText, noSummaries, pending,
-    newDrive: (drive ?? []).filter((it) => !urls.some((u) => u.includes(it.drive_id))).length,
+    total, noSummaries, pending,
+    noText: noText.length, noTextArticles: noText,
+    newDrive: (drive ?? []).filter((it) => !urls.some((u) => u.includes(it.drive_id)) && !titles.has(normText(it.title))).length,
     newPdfs: pdfs ? unmatchedPdfs(pdfs, arts ?? []).length : null,   // null = no saved text file yet
     pdfFiles: pdfs?.length ?? 0,
   };

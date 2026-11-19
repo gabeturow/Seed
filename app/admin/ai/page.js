@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { hasClaudeKey, vettedSites } from "@/lib/claude";
@@ -21,7 +22,16 @@ export default async function AiPage({ searchParams }) {
   const todo = [
     status.newDrive > 0 && `${n(status.newDrive, "Drive article", "Drive articles")} to add to the review queue`,
     status.newPdfs > 0 && `${n(status.newPdfs, "PDF", "PDFs")} in the folder that ${status.newPdfs === 1 ? "isn't" : "aren't"} in the library yet (uses a little credit)`,
-    status.noText > 0 && `${n(status.noText, "article has", "articles have")} no text yet (the update looks in the PDF folder, then tries the article link)`,
+    status.noText > 0 && (
+      <Fragment key="no-text">
+        {n(status.noText, "article has", "articles have")} no text yet (the update looks in the PDF folder, then tries the article link):
+        <ul>
+          {status.noTextArticles.map((a) => (
+            <li key={a.id}><Link href={`/admin/articles/${a.id}`}>{a.title || `Article ${a.id}`}</Link></li>
+          ))}
+        </ul>
+      </Fragment>
+    ),
     status.noSummaries > 0 && `${n(status.noSummaries, "article needs", "articles need")} the 1-page and 5-page summaries (uses credit)`,
   ].filter(Boolean);
 
@@ -62,11 +72,11 @@ export default async function AiPage({ searchParams }) {
       <section className="card">
         <h2>Find papers your library cites</h2>
         <p>
-          Reads the reference lists of the articles you already have and counts which works several of them cite. The most-cited ones that
-          aren&apos;t in the library are looked up on the web and added to the review queue, with a note of which articles cite them.
-          Reading the lists costs a few cents in all; each lookup costs a few cents.
+          Reads the reference lists of the articles you already have and counts how many of them cite each work. Below are the
+          most-cited works that aren&apos;t in the library, ranked by that count. Tick the ones you want: each is looked up on the
+          web and added to the review queue with its text and a note of which articles cite it.
         </p>
-        <CitationFinder disabled={!hasClaudeKey} {...cited} />
+        <CitationFinder key={cited.top?.map((w) => w.id).join(",")} disabled={!hasClaudeKey} {...cited} />
       </section>
 
       <details className="card">

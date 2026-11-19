@@ -20,3 +20,6 @@ alter table public.cite_runs enable row level security;
 drop policy if exists "cite_runs: admin" on public.cite_runs;
 create policy "cite_runs: admin" on public.cite_runs for all to authenticated
   using (public.is_admin()) with check (public.is_admin());
+
+-- A run can look up exactly the cited works the admin ticked (instead of the top few above a citation bar).
+alter table public.cite_runs add column if not exists work_ids bigint[];

@@ -326,3 +326,10 @@ a.view-tab:hover { text-decoration: none; }
 .job.failed .job-state { color: #a02a2a; }
 .job-label { overflow-wrap: anywhere; }
 .job-msg { flex-basis: 100%; color: var(--muted, #666); font-size: .82rem; }
+
+/* Most-cited works list on the Scout page */
+.linklike { background: none; border: 0; padding: 0; color: var(--accent, inherit); text-decoration: underline; cursor: pointer; font: inherit; }
+.cited-table { max-height: 520px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; }
+.cited-table td { vertical-align: top; padding-right: 10px; }
+.cited-table td.cites { font-weight: 600; text-align: center; white-space: nowrap; }
+.cited-table details ul { margin: 4px 0 0; padding-left: 18px; }

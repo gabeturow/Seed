@@ -25,7 +25,7 @@ async function work(supabase, run) {
     }
     while (scanDone && roomLeft() && !findDone && r.processed < run.how_many) {
       await save({ phase: "Looking up cited works" });
-      const f = await findCited(supabase, run.min_cites);
+      const f = await findCited(supabase, run.min_cites, run.work_ids);
       if (f.fatal) throw new Error(f.text);
       r.processed += f.processed ?? 0; r.added += f.added ?? 0; r.not_found += f.notFound ?? 0;
       if (!f.left || !f.processed) findDone = true;
