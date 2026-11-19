@@ -3,7 +3,7 @@ import { useState } from "react";
 import RichText from "./RichText";
 
 // The ways to read one article: short summary, 1 page, 5 pages, or the original (opens in a new tab).
-export default function ArticleViews({ url, summary, page, long, start = "short", showAiNote = false }) {
+export default function ArticleViews({ links = {}, summary, page, long, start = "short", showAiNote = false }) {
   const views = [
     { key: "short", label: "Short" },
     page && { key: "page", label: "1 page", text: page },
@@ -20,7 +20,8 @@ export default function ArticleViews({ url, summary, page, long, start = "short"
           <button key={v.key} type="button" role="tab" aria-selected={view === v.key}
             className={`view-tab${view === v.key ? " on" : ""}`} onClick={() => setView(v.key)}>{v.label}</button>
         ))}
-        <a className="view-tab" href={url} target="_blank" rel="noreferrer">Original</a>
+        {links.page && <a className="view-tab" href={links.page} target="_blank" rel="noreferrer">{links.pageLabel}</a>}
+        {links.pdf && <a className="view-tab" href={links.pdf} target="_blank" rel="noreferrer">Read the PDF</a>}
       </div>
       {view === "short" && (summary ? <p className="summary">{summary}</p> : <p className="summary placeholder">Summary to come.</p>)}
       {view !== "short" && current && (

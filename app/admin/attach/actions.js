@@ -18,6 +18,7 @@ export async function attachPdf({ path, name }) {
     if (!m) { await drop(); return { status: "unmatched", name, reason: text ? "no article matched, or it already has a PDF" : "scanned PDF with no readable text" }; }
     const a = arts.find((x) => x.id === m.article.id);
     const fix = { pdf_path: path, url: `/library/${a.id}/pdf` };
+    if (a.url && !a.url.startsWith("/library/")) fix.source_url = a.url;
     if (a.url && !a.url.startsWith("/library/")) fix.admin_notes = [a.admin_notes, `Original link: ${a.url}`].filter(Boolean).join("\n");
     const gotText = !!text && (!a.full_text || a.full_text.length < 800);
     if (gotText) fix.full_text = text;

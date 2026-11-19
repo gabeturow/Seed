@@ -6,9 +6,16 @@ import { setTopics } from "@/lib/articles";
 import { fillTexts, pdfBufferText } from "@/lib/fulltext";
 import { cleanUrl, ids, int, text, withMsg } from "@/lib/forms";
 
+// "https://doi.org/10.1234/x", "doi:10.1234/x" or "10.1234/x" -> "10.1234/x" (null if it isn't a DOI).
+function cleanDoi(v) {
+  const m = /10\.\d{4,9}\/\S+/.exec(decodeURIComponent(String(v ?? "")));
+  return m ? m[0].replace(/[.,;)]+$/, "") : null;
+}
+
 function articleFields(fd) {
   return {
     url: cleanUrl(text(fd, "url")),
+    doi: cleanDoi(text(fd, "doi")),
     title: text(fd, "title"),
     authors: text(fd, "authors"),
     source_id: int(fd, "source_id"),
@@ -65,6 +72,9 @@ export async function saveArticle(fd) {
     const { data: cur } = id ? await supabase.from("articles").select("pdf_path").eq("id", id).maybeSingle() : { data: null };
     if (!cur?.pdf_path) fail("Every article needs a link or an uploaded PDF.");
   }
+  // The article's own web link is kept apart from any stored PDF, so the library can show both.
+  if (fields.url && !fields.url.startsWith("/library/")) fields.source_url = fields.url;
+  if (fields.doi) fields.doi_checked_at = new Date().toISOString();
   const uploaded = fields.pdf_path;
   if (!uploaded) delete fields.pdf_path;
   else {

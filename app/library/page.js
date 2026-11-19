@@ -6,7 +6,7 @@ import { loadChats } from "@/lib/chats";
 import Notice from "@/components/Notice";
 
 // Everything a card shows. Leaves out the full text and long summaries, which are large.
-const CARD_COLUMNS = "id, url, title, authors, source_id, publication_date, publication_year, resource_type, publication_details, related_organizations, summary, summary_origin, summary_needs_review, internal";
+const CARD_COLUMNS = "id, url, title, authors, source_id, publication_date, publication_year, resource_type, publication_details, related_organizations, summary, summary_origin, summary_needs_review, internal, doi, source_url, pdf_path";
 
 export default async function LibraryPage({ searchParams }) {
   const sp = await searchParams;

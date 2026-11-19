@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ArticleAsk from "./ArticleAsk";
-import { displayDate } from "@/lib/articles";
+import { articleLinks, displayDate } from "@/lib/articles";
 
 export default function ArticleCard({ article: a, topics, sourceName, isAdmin, isStaff, chat = [], deeper = [] }) {
   const date = displayDate(a);
@@ -17,7 +17,7 @@ export default function ArticleCard({ article: a, topics, sourceName, isAdmin, i
       {a.summary
         ? <p className="summary">{a.summary}</p>
         : <p className="summary placeholder">Summary to come.</p>}
-      <ArticleAsk articleId={a.id} url={a.url} saved={chat}
+      <ArticleAsk articleId={a.id} links={articleLinks(a)} saved={chat}
         deeperHref={deeper.length > 0 ? `/library/${a.id}?view=${deeper.includes("page") ? "page" : "long"}` : null}>
         <div className="card-foot">
           <div className="tags">

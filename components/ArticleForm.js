@@ -12,7 +12,11 @@ export default function ArticleForm({ article = {}, sources, topics, selectedTop
 
       <div className="grid-2">
         <label className="span-2">Link <span className="hint">(required unless you upload a PDF below)</span>
-          <input name="url" defaultValue={a.pdf_path ? "" : (a.url ?? "")} placeholder={a.pdf_path ? "Using the stored PDF" : "https://"} />
+          <input name="url" defaultValue={a.source_url ?? (a.pdf_path ? "" : (a.url ?? ""))} placeholder="https://" />
+          <span className="hint">The article&apos;s own web page. A stored PDF is shown separately as &ldquo;Read the PDF&rdquo;.</span>
+        </label>
+        <label className="span-2">DOI <span className="hint">(if it has one; the library links to it)</span>
+          <input name="doi" defaultValue={a.doi ?? ""} placeholder="10.1234/abcd.5678" />
         </label>
         <PdfUpload current={!!a.pdf_path} />
         <label className="span-2">Title

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireApproved } from "@/lib/auth";
 import { hasClaudeKey } from "@/lib/claude";
-import { displayDate, loadTopicsFor } from "@/lib/articles";
+import { articleLinks, displayDate, loadTopicsFor } from "@/lib/articles";
 import ArticleViews from "@/components/ArticleViews";
 import { loadChats } from "@/lib/chats";
 import DiscussArticle from "@/components/DiscussArticle";
@@ -16,7 +16,7 @@ export default async function ArticlePage({ params, searchParams }) {
   if (!Number.isInteger(id)) notFound();
   const { supabase, user, isAdmin, isStaff } = await requireApproved();
   const { data: a } = await supabase.from("articles")
-    .select("id, url, title, authors, publication_year, publication_date, resource_type, summary, summary_origin, internal, source_id, summary_page, summary_long")
+    .select("id, url, doi, source_url, pdf_path, title, authors, publication_year, publication_date, resource_type, summary, summary_origin, internal, source_id, summary_page, summary_long")
     .eq("id", id).eq("status", "approved").maybeSingle();
   if (!a) notFound();
   const [topics, { data: source }, textRow] = await Promise.all([
@@ -34,7 +34,7 @@ export default async function ArticlePage({ params, searchParams }) {
       <article className="card article">
         <h1 className="article-title">{a.title || a.url}</h1>
         {meta.length > 0 && <p className="meta">{meta.join(" · ")}</p>}
-        <ArticleViews url={a.url} summary={a.summary} page={a.summary_page} long={a.summary_long} start={view} showAiNote={isStaff} />
+        <ArticleViews links={articleLinks(a)} summary={a.summary} page={a.summary_page} long={a.summary_long} start={view} showAiNote={isStaff} />
         <div className="card-foot">
           <div className="tags">
             {(topics[a.id] ?? []).map((t) => <Link key={t.id} href={`/library?topic=${t.id}`} className="tag">{t.name}</Link>)}

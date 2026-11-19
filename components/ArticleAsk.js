@@ -7,7 +7,7 @@ import { clearArticleChat, discussArticle } from "@/app/library/[id]/actions";
 
 // The links under a library card (Original, Go deeper, Ask a question) plus the question panel and answers.
 // `children` is the rest of the card (tags and flags), which sits between the links and the panel.
-export default function ArticleAsk({ articleId, url, deeperHref, saved = [], children }) {
+export default function ArticleAsk({ articleId, links = {}, deeperHref, saved = [], children }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState(saved);
   const [draft, setDraft] = useState("");
@@ -37,7 +37,8 @@ export default function ArticleAsk({ articleId, url, deeperHref, saved = [], chi
   return (
     <>
       <p className="card-links">
-        <a href={url} target="_blank" rel="noreferrer">Original</a>
+        {links.page && <a href={links.page} target="_blank" rel="noreferrer">{links.pageLabel}</a>}
+        {links.pdf && <a href={links.pdf} target="_blank" rel="noreferrer">Read the PDF</a>}
         {deeperHref && <Link href={deeperHref}>Go deeper</Link>}
         <button type="button" className="link-button plain-ink" aria-expanded={open} onClick={() => { setOpen(!open); if (!open) setTimeout(() => box.current?.focus(), 0); }}>
           Ask a question
