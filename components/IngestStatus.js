@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { clearFinishedJobs, retryJob } from "@/app/admin/ingest";
 import { clearCitationRuns } from "@/app/admin/ai/cited";
@@ -15,14 +16,19 @@ export default function IngestStatus() {
   const lastCiteKick = useRef(0);
   const lastBgKick = useRef(0);
   const wasBusy = useRef(false);
+  const lastPending = useRef(null);
+  const router = useRouter();
   const timer = useRef(null);
 
   const refresh = useCallback(async () => {
-    let list = [], run = null, bgRuns = [];
+    let list = [], run = null, bgRuns = [], pending = null;
     try {
       const res = await fetch("/api/ingest/status", { cache: "no-store" });
-      if (res.ok) { const body = await res.json(); list = body.jobs ?? []; run = body.cite ?? null; bgRuns = body.bg ?? []; }
+      if (res.ok) { const body = await res.json(); list = body.jobs ?? []; run = body.cite ?? null; bgRuns = body.bg ?? []; pending = body.pending ?? null; }
     } catch { return 20_000; }
+    // The header (with the Review counter) isn't re-rendered on its own when background work adds articles.
+    if (pending !== null && lastPending.current !== null && pending !== lastPending.current) router.refresh();
+    if (pending !== null) lastPending.current = pending;
     setJobs(list); setCite(run); setBg(bgRuns);
     const queued = list.filter((j) => j.status === "queued").length;
     const running = list.filter((j) => j.status === "running").length;
@@ -44,7 +50,7 @@ export default function IngestStatus() {
     if (wasBusy.current && !busy) setOpen(false);   // everything finished and the queue is empty: fold the panel away
     wasBusy.current = busy;
     return busy ? 3_000 : 20_000;
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     let stop = false;

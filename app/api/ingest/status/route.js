@@ -10,5 +10,7 @@ export async function GET() {
     .gte("created_at", since).order("id", { ascending: false }).limit(1);   // null/empty if the table isn't set up
   const { data: bg } = await supabase.from("bg_runs").select("id, kind, status, phase, message, progress, created_at")
     .gte("created_at", since).order("id", { ascending: false }).limit(4);   // null/empty if the table isn't set up
-  return Response.json({ jobs: data ?? [], cite: runs?.[0] ?? null, bg: bg ?? [] });
+  // How many articles wait in Review, so the panel can refresh the header's counter when background work adds some.
+  const { count: pending } = await supabase.from("articles").select("id", { count: "exact", head: true }).eq("status", "pending");
+  return Response.json({ jobs: data ?? [], cite: runs?.[0] ?? null, bg: bg ?? [], pending: pending ?? null });
 }
